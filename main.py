@@ -28,8 +28,8 @@ enemy = [] #computer's ant [pos, angle]
 #########################################################################
 
 foodSpawn = game.SpawnFood()
-player = game.SpawnAnt([750, 550])
-computer = game.SpawnAnt([50, 50])
+player = game.SpawnAnt([90, 65])
+computer = game.SpawnAnt([10, 10])
 
 timeCounter = 0
 while True:
@@ -80,21 +80,18 @@ while True:
             pheromone.append(temp)
             pheromoneTime.append(setting.PHEROMONE_LIFETIME)
 
-    
+    ###############
     # Display
     # TEMP now all ant are just dots.
     # Use the old data and new data.
     # The index is the same for the new data and old data.
     # If an ant is killed off then the new Data will have the pos as -1,-1
-    window.fill(black)
-    for pos in ant:
-        pygame.draw.circle(window, blue, pos, 4)
-    for pos in food:
-        pygame.draw.circle(window, white, pos, 2)
-    for pos in pheromone:
-        print pos
-        pygame.draw.circle(window, green, pos, 2)
+    # The whole game is a made up of 8 by 8 grids.
+    # for example if a ant at 1, 1 means the center of the image of ant should be at 4,4.
+    #############
+    
     
             
     pygame.display.update()
     fpsClock.tick(setting.FPS)
+
