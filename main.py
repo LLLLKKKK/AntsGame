@@ -87,7 +87,8 @@ while True:
     # The index is the same for the new data and old data.
     # If an ant is killed off then the new Data will have the pos as -1,-1
     # The whole game is a made up of 8 by 8 grids.
-    # for example if a ant at 1, 1 means the center of the image of ant should be at 4,4.
+    # for example if a ant at 0, 0 means the center of the image of ant should be at 4,4.
+    # To convert should just be [x,y] => [x*8+4, y*8+4]
     #############
     
     
