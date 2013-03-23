@@ -16,29 +16,21 @@ blue = pygame.Color(0,0,255)
 white = pygame.Color(255,255,255)
 
 #######################################################################
-food = [] #[pos]
-pheromone = [] # [pos]
-pheromoneTime = []
+
 wall = [] #[pos]
-ant = [] #player's ant [pos, angle]
-enemy = [] #computer's ant [pos, angle]
+
 # In term of angle postive is counter clock wise. Negative is clockwise.
 # 0 is upward (12 clock pos).
 # For example 30 means 11 clock pos.
 #########################################################################
 
-foodSpawn = game.SpawnFood()
-player = game.SpawnAnt([90, 65])
-computer = game.SpawnAnt([10, 10])
+foods = game.Foods()
+player = game.Ants([90, 65])
+computer = game.Ants([10, 10])
+pheromones = game.Pheromones()
 
 timeCounter = 0
 while True:
-    ####################################### OLD DATA
-    oldFood = food
-    oldPheromone = pheromone
-    oldAnt = ant
-    oldEnemy = enemy
-    #######################################
     
     # Game Logic
     timeCounter += 1
@@ -46,22 +38,18 @@ while True:
     if timeCounter >= setting.TIME_SCALE:  # For every one second.
         timeCounter = 0        
         # Spawn
-        player.spawn(ant)
+        player.spawn()
+        computer.spawn()
+
         #computer.spawn(enemy) # No computer AI yet.
         # Spawn food if not capped.
-        if(len(food) < setting.MAX_FOOD):
-            foodSpawn.spawn(food)
+        
+        foods.spawn()
         
         # Find move target (where to move to)
-        ai.playerMove([ant, enemy, food, pheromone, wall, [750, 550], [50, 50]])
+        ai.playerMove([player, computer, foods, pheromones, wall, [750, 550], [50, 50]])
         
-        # Pheromone lifetime
-        for i, x in enumerate(pheromoneTime):
-            pheromoneTime[i] -= 1
-            # remove pheromone with 0 lifetime
-            if(pheromoneTime[i] <= 0):
-                pheromone.pop(i)
-                pheromoneTime.pop(i)
+        pheromones.refresh()
 
     # Occur every frame
     # Handle input
@@ -73,12 +61,7 @@ while True:
             mousex, mousey == event.pos
         elif event.type == MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
-            temp = [pos[0], pos[1]]
-            # Remove first pheromone if too many
-            if(len(pheromone) > setting.MAX_PHEROMONE):
-                pheromone.pop(0)
-            pheromone.append(temp)
-            pheromoneTime.append(setting.PHEROMONE_LIFETIME)
+            pheromones.spawn()
 
     ###############
     # Display
@@ -91,9 +74,10 @@ while True:
     # To convert should just be [x,y] => [x*8+4, y*8+4]
     #############
     
+    window.fill(black)
+    computer.draw(window, blue)
+    player.draw(window, green)
 
-    
-            
     pygame.display.update()
     fpsClock.tick(setting.FPS)
 
