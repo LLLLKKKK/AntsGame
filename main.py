@@ -1,19 +1,11 @@
-import pygame, sys, random, ai, setting, game
+import pygame, sys, random, ai, setting
 from pygame.locals import *
 
 random.seed()
 pygame.init()
-fpsClock = pygame.time.Clock()
 
-window = pygame.display.set_mode(setting.SIZE)
-mousex, mousey = 0,0
+screen = pygame.display.set_mode(setting.SIZE)
 pygame.display.set_caption('TERM PROJECT')
-
-black = pygame.Color(0,0,0)
-red = pygame.Color(255,0,0)
-green = pygame.Color(0,255,0)
-blue = pygame.Color(0,0,255)
-white = pygame.Color(255,255,255)
 
 #######################################################################
 
@@ -24,32 +16,64 @@ wall = [] #[pos]
 # For example 30 means 11 clock pos.
 #########################################################################
 
-foods = game.Foods()
-player = game.Ants([90, 65])
-computer = game.Ants([10, 10])
-pheromones = game.Pheromones()
+#foods = game.Foods()
+#player = game.Ants([90, 65])
+#computer = game.Ants([10, 10])
+#pheromones = game.Pheromones()
 
-timeCounter = 0
+from game import Ant
+from game import Pheromone
+from game import Food
+
+black = (0, 0, 0)
+
+background = pygame.Surface((screen.get_width(), screen.get_height()))
+background.fill(black)
+background = background.convert()
+screen.blit(background, (0, 0))
+
+FPS = 60
+time_counter = 0
+clock = pygame.time.Clock()
+
+pheromone_group = pygame.sprite.Group()
+ant_group = pygame.sprite.Group()
+food_group = pygame.sprite.Group()
+all_group = pygame.sprite.Group()
+
+Pheromone.groups = pheromone_group, all_group
+Ant.groups = ant_group, all_group
+Food.groups = food_group, all_group
+
+Ant()
+
 while True:
     
-    # Game Logic
-    timeCounter += 1
-    # Occur every few frame
-    if timeCounter >= setting.TIME_SCALE:  # For every one second.
-        timeCounter = 0        
+    milliseconds = clock.tick(FPS)
+    seconds = milliseconds / 1000.0
+
+
+    time_counter += 1
+    if time_counter >= setting.TIME_SCALE:  # For every one second.
+        time_counter = 0
+        
+        posx = random.uniform(0, screen.get_width())
+        posy = random.uniform(0, screen.get_height())
+        Food((posx, posy))
+        #Ant()        
         # Spawn
-        player.spawn()
-        computer.spawn()
+        #player.spawn()
+        #computer.spawn()
 
         #computer.spawn(enemy) # No computer AI yet.
         # Spawn food if not capped.
         
-        foods.spawn()
+        #foods.spawn()
         
         # Find move target (where to move to)
-        ai.playerMove([player, computer, foods, pheromones, wall, [750, 550], [50, 50]])
+        #ai.playerMove([player, computer, foods, pheromones, wall, [750, 550], [50, 50]])
         
-        pheromones.refresh()
+        #pheromones.refresh()
 
     # Occur every frame
     # Handle input
@@ -57,11 +81,20 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        elif event.type == MOUSEMOTION:
-            mousex, mousey == event.pos
+        #elif event.type == MOUSEMOTION:
+        #    mousex, mousey == event.pos
         elif event.type == MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
-            pheromones.spawn()
+            Pheromone(pos)
+
+    pheromone_eat_group = pygame.sprite.groupcollide(ant_group, pheromone_group, False, True)
+    food_eat_group = pygame.sprite.groupcollide(ant_group, food_group, False, True)
+    
+    all_group.clear(screen, background)
+    all_group.update(seconds)
+    all_group.draw(screen)
+
+    pygame.display.flip()
 
     ###############
     # Display
@@ -74,10 +107,10 @@ while True:
     # To convert should just be [x,y] => [x*8+4, y*8+4]
     #############
     
-    window.fill(black)
-    computer.draw(window, blue)
-    player.draw(window, green)
+    #window.fill(black)
+    #computer.draw(window, blue)
+    #player.draw(window, green)
 
-    pygame.display.update()
-    fpsClock.tick(setting.FPS)
+    #pygame.display.update()
+    #fpsClock.tick(setting.FPS)
 

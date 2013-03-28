@@ -1,122 +1,143 @@
-import setting, random, pygame
+import setting, random, pygame, math
 from pygame.locals import *
 
 random.seed()
 
-def GetCenterPos(pos):
-    return [pos[0]*8+4, pos[1]*8+4]
+def dist(obj1, obj2):
+    center1 = obj1.get_center();
+    center2 = obj2.get_center();
+    return math.hypot(center1[0] - center2[0], 
+                      center1[1] - center2[1])
 
-class Ants:
-    def __init__(self, playerHive):
-        self.hive = playerHive
-        self.spawnRate = setting.ANT_SPAWN_RATE
-        self.spawnCounter = 0
-        
-        self.ants = []
-        self.index = 0
+def closest_object(ant, object_group):
+    if len(object_group) > 0:
+        it = iter(object_group)
+        obj = it.next()
+        for i in it:
+            if (dist(ant, i) < dist(ant, obj)):
+                obj = i
+        return obj
+    else:
+        pass
 
-    def __iter__(self):
-        return self
-
-    def __len__(self):
-        return len(self.ants)
-
-    def __getitem__(self, index):
-        return self.ants[index]
+def object_turn_to(obj1, obj2):
+    center1 = obj1.get_center();
+    center2 = obj2.get_center();
     
-    def __setitem__(self, key, value):
-        self.ants[key] = value
+    dist_x = center2[0] - center1[0]
+    dist_y = center2[1] - center1[1]
 
-    def next(self):
-        if self.index >= len(self.ants) - 1:
-            raise StopIteration
-        self.index = self.index + 1
-        return self.ants[self.index]
+    if dist_x != 0:
+        if dist_x > 0:
+            obj1.angle = math.atan(dist_y * 1.0 / dist_x)
+        else:
+            obj1.angle = math.pi + math.atan(dist_y * 1.0 / dist_x)
+    else:
+        if dist_y > 0:
+            obj1.angle = -math.pi / 2.0
+        else:
+            obj1.angle = math.pi / 2.0
 
-    # Add spawned ant to the list of ants.
-    def spawn(self):
-        temp = [self.hive[0],self.hive[1]]
-        self.spawnCounter += self.spawnRate
-        for i in range(int(self.spawnCounter)):
-            self.ants.append(temp)
+class Ant(pygame.sprite.Sprite):
+    
+    # static class variables
+    # image setup
+    image = pygame.Surface((8, 8))
+    image.set_colorkey((0, 0, 0))
+    pygame.draw.circle(image, (255, 255, 0), (4, 4), 4)
+    image = image.convert_alpha()
 
-    def eatFood(self):
-        self.spawnRate += setting.FOOD_INCREASE_SPAWN_RATE
+    food_vision = 100
+    pheromone_vision = 200
 
-    def draw(self, screen, color):
-        for ant in self.ants:
-            pygame.draw.circle(screen, color, GetCenterPos(ant), 8)
-
-class Foods:
+    # code for each individual class instances
     def __init__(self):
-        self.spawnCounter = 0
-        self.spawnRate = setting.FOOD_SPAWN_RATE
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.image = Ant.image
+        self.rect = self.image.get_rect()
+        self.rect.center = (10, 10)
+        self.radius = 100
+        self.angle = math.pi / 4
 
-        self.foods = []
-        self.index = 0
+    def update(self, seconds):
 
-    def __iter__(self):
-        return self
+        closest_pheromone =  closest_object(self, Pheromone.groups[0])
+        if (not (closest_pheromone is None)) and dist(closest_pheromone, self) < Ant.pheromone_vision:
+            object_turn_to(self, closest_pheromone)
+        else:
+            closest_food =  closest_object(self, Food.groups[0])
+            if (not (closest_food is None)) and dist(closest_food, self) < Ant.food_vision:
+                object_turn_to(self, closest_food)
 
-    def __len__(self):
-        return len(self.foods)
-        
-    def __getitem__(self, index):
-        return self.foods[index]
+        self.rect.centerx += round(seconds * 50.0 * math.cos(self.angle), 0)
+        self.rect.centery += round(seconds * 50.0 * math.sin(self.angle), 0)
 
-    def __setitem__(self, key, value):
-        self.foods[key] = value
+        if (self.rect.centerx < 0):
+            self.rect.centerx = 0
+            
+        if (self.rect.centery < 0):
+            self.rect.centery = 0
 
-    def next(self):
-        if self.index >= len(self.foods) - 1:
-            raise StopIteration
-        self.index = self.index + 1
-        return self.foods[self.index]
+    def rotate(self, angle):
+        old_self_rect_center = self.rect.center
+        old_image_rect_center = self.image.get_rect().center
+        rotated_image =  pygame.transform.rotate(Ant.image, self.angle)
+        new_image_rect_center = rotated_image.get_rect().center
+        self.rect.center = (old_self_rect_center[0] + (old_image_rect_center[0] - new_image_rect_center[0]), old_self_rect_center[1] + (old_image_rect_center[1] - new_image_rect_center[1]))
 
-    def spawn(self):
-        if(len(self.foods) < setting.MAX_FOOD):
-            self.spawnCounter += self.spawnRate
-            for i in range(int(self.spawnCounter)):
-                x = random.randint(0, setting.SIZE[0])
-                y = random.randint(0, setting.SIZE[0])
-                self.foods.append([x, y])
+        self.image = rotated_image
+
+    def get_center(self):
+        return self.rect.center
 
 
+class Pheromone(pygame.sprite.Sprite):
     
-class Pheromones:
-    def __init__(self):
-        self.pheromones = []
-        self.pheromonesTime = []
-        self.index = 0
+    # static class variables
+    # image setup
+    image = pygame.Surface((8, 8))
+    image.set_colorkey((0, 0, 0))
+    pygame.draw.circle(image, (255, 0, 255), (4, 4), 4)
+    image = image.convert_alpha()
 
-    def __iter__(self):
-        return self
 
-    def __len__(self):
-        return len(self.pheromones)
+    # code for each individual class instances
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.image = Pheromone.image
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.radius = 100
+        self.live = 10.0
 
-    def __setitem__(self, key, value):
-        self.pheromones[key] = value
+    def update(self, seconds):
+        self.live -= seconds
+        if self.live < 0:
+            self.kill()
 
-    def next(self):
-        if self.index >= len(self.pheromones) - 1:
-            raise StopIteration
-        self.index = self.index + 1
-        return self.pheromones[self.index]
+    def get_center(self):
+        return self.rect.center
 
-    def __getitem__(self, index):
-        return self.pheromones[index]
+class Food(pygame.sprite.Sprite):
     
-    def spawn(self, pos):
-        if(len(pheromones) > setting.MAX_PHEROMONE):
-            pheromones.pop(0)
-        pheromones.append(pos)
-        pheromonesTime.append(setting.PHEROMONE_LIFETIME)
+    # static class variables
+    # image setup
+    image = pygame.Surface((8, 8))
+    image.set_colorkey((0, 0, 0))
+    pygame.draw.circle(image, (0, 255, 0), (4, 4), 4)
+    image = image.convert_alpha()
 
-    def refresh(self):
-        for i, x in enumerate(self.pheromonesTime):
-            self.pheromonesTime[i] -= 1
-            # remove pheromone with 0 lifetime
-            if(self.pheromonesTime[i] <= 0):
-                self.pheromones.remove(i)
-                self.pheromonesTime.remove(i)
+
+    # code for each individual class instances
+    def __init__(self, pos):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.image = Food.image
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+        self.radius = 100
+
+    def update(self, seconds):
+        pass
+
+    def get_center(self):
+        return self.rect.center        
