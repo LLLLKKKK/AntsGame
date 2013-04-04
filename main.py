@@ -11,16 +11,6 @@ pygame.display.set_caption('TERM PROJECT')
 
 wall = [] #[pos]
 
-# In term of angle postive is counter clock wise. Negative is clockwise.
-# 0 is upward (12 clock pos).
-# For example 30 means 11 clock pos.
-#########################################################################
-
-#foods = game.Foods()
-#player = game.Ants([90, 65])
-#computer = game.Ants([10, 10])
-#pheromones = game.Pheromones()
-
 from game import Ant
 from game import Pheromone
 from game import Food
@@ -36,16 +26,38 @@ FPS = 60
 time_counter = 0
 clock = pygame.time.Clock()
 
+computer_ant_groupid = 0
+player_ant_groupid = 1
+
 pheromone_group = pygame.sprite.Group()
-ant_group = pygame.sprite.Group()
+ant_groups = []
+ant_groups.append(pygame.sprite.Group())
+ant_groups.append(pygame.sprite.Group())
 food_group = pygame.sprite.Group()
 all_group = pygame.sprite.Group()
 
 Pheromone.groups = pheromone_group, all_group
-Ant.groups = ant_group, all_group
 Food.groups = food_group, all_group
 
-Ant()
+def get_enemy_groups(groupid):
+    groups = []
+    for gid, ant_group in enumerate(ant_groups):
+        if gid != groupid:
+            groups.append(ant_group)
+    return groups
+    
+def spawn_ant(groupid):
+    new_ant = Ant(groupid)
+    new_ant.enemy_groups = ant_enemy_groups[groupid]
+    ant_groups[groupid].add(new_ant)
+    all_group.add(new_ant)
+
+ant_enemy_groups = [0] * 2
+ant_enemy_groups[player_ant_groupid] = get_enemy_groups(player_ant_groupid)
+ant_enemy_groups[computer_ant_groupid] = get_enemy_groups(computer_ant_groupid)
+
+spawn_ant(computer_ant_groupid)
+spawn_ant(player_ant_groupid)
 
 while True:
     
@@ -54,26 +66,12 @@ while True:
 
 
     time_counter += 1
-    if time_counter >= setting.TIME_SCALE:  # For every one second.
+    if time_counter >= setting.TIME_SCALE:
         time_counter = 0
         
         posx = random.uniform(0, screen.get_width())
         posy = random.uniform(0, screen.get_height())
         Food((posx, posy))
-        #Ant()        
-        # Spawn
-        #player.spawn()
-        #computer.spawn()
-
-        #computer.spawn(enemy) # No computer AI yet.
-        # Spawn food if not capped.
-        
-        #foods.spawn()
-        
-        # Find move target (where to move to)
-        #ai.playerMove([player, computer, foods, pheromones, wall, [750, 550], [50, 50]])
-        
-        #pheromones.refresh()
 
     # Occur every frame
     # Handle input
@@ -81,35 +79,27 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             sys.exit()
-        #elif event.type == MOUSEMOTION:
-        #    mousex, mousey == event.pos
         elif event.type == MOUSEBUTTONUP:
             pos = pygame.mouse.get_pos()
             Pheromone(pos)
 
-    pheromone_eat_group = pygame.sprite.groupcollide(ant_group, pheromone_group, False, True)
-    food_eat_group = pygame.sprite.groupcollide(ant_group, food_group, False, True)
-    
+    for groupid, ant_group in enumerate(ant_groups):
+        killed_pheromone_dict = pheromone_eat_group = pygame.sprite.groupcollide(pheromone_group, ant_group, True, False)
+        killed_food_dict = food_eat_group = pygame.sprite.groupcollide(food_group, ant_group, True, False)
+        
+        for foods in killed_food_dict.values():
+            for food in foods:
+                spawn_ant(groupid)
+
+    pygame.sprite.groupcollide(ant_groups[0], ant_groups[1], True, True)
+
     all_group.clear(screen, background)
     all_group.update(seconds)
     all_group.draw(screen)
 
     pygame.display.flip()
 
-    ###############
-    # Display
-    # TEMP now all ant are just dots.
-    # Use the old data and new data.
-    # The index is the same for the new data and old data.
-    # If an ant is killed off then the new Data will have the pos as -1,-1
-    # The whole game is a made up of 8 by 8 grids.
-    # for example if a ant at 0, 0 means the center of the image of ant should be at 4,4.
-    # To convert should just be [x,y] => [x*8+4, y*8+4]
-    #############
-    
-    #window.fill(black)
-    #computer.draw(window, blue)
-    #player.draw(window, green)
+    # print clock.get_fps()
 
     #pygame.display.update()
     #fpsClock.tick(setting.FPS)

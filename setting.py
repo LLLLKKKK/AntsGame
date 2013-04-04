@@ -2,9 +2,9 @@
 # This is to make it easy to change variables in the future.
 
 # GENERAL
-SIZE =  width, height = 800, 600
+SIZE =  screen_width, screen_height = 800, 600
 FPS = 12 # frames per second.
-TIME_SCALE = 10 # Time Scale
+TIME_SCALE = 60 # Time Scale
 
 # GAME
 MAX_ANT = 200
