@@ -59,9 +59,12 @@ class Ant(pygame.sprite.Sprite):
     images = []
     #images.append(create_circle_image(8, (255, 255, 0)))
     ant_image = pygame.image.load(os.path.join("", "ant.png")).convert()
+    ############################################
     #ant_image.set_colorkey(ant_image.get_at((0, 0)))
     images.append(ant_image)
-    images.append(create_circle_image(8, (0, 255, 255)))
+    brownant_image = pygame.image.load(os.path.join("", "redant.png")).convert()
+    images.append(brownant_image)
+    ##############################################
 
     hives = []
     hives.append((10, 20))
@@ -74,6 +77,7 @@ class Ant(pygame.sprite.Sprite):
     spread_length = 20.0
     speed = 100.0
     food_vision = 100
+    AI_food_vision = 300
     enemy_vision = 150
     pheromone_vision = 200
 
@@ -100,12 +104,26 @@ class Ant(pygame.sprite.Sprite):
     def update(self, seconds):
 
         move_length = seconds * self.speed
-        is_attracted = False
+        is_attracted = False        
 
-        closest_pheromone = closest_object(self, Pheromone.groups[0])
-        if (not (closest_pheromone is None)) and dist(closest_pheromone, self) < Ant.pheromone_vision:
-            object_turn_to(self, closest_pheromone)
-            is_attracted = True
+        ##############################################
+        # Player AI
+        if(self.groupid == 0):
+            closest_pheromone = closest_object(self, Pheromone.groups[0])
+            if (self.groupid == 0 and not (closest_pheromone is None)) and dist(closest_pheromone, self) < Ant.pheromone_vision:
+                object_turn_to(self, closest_pheromone)
+                is_attracted = True
+            else:
+                closest_enemy = closest_object(self, self.enemy_groups[0])
+                if (not (closest_enemy is None)) and dist(closest_enemy, self) < Ant.enemy_vision:
+                    object_turn_to(self, closest_enemy)
+                    is_attracted = True
+                else:
+                    closest_food = closest_object(self, Food.groups[0])
+                    if (not (closest_food is None)) and dist(closest_food, self) < Ant.food_vision:
+                        object_turn_to(self, closest_food)
+                        is_attracted = True
+        # Enemy AI
         else:
             closest_enemy = closest_object(self, self.enemy_groups[0])
             if (not (closest_enemy is None)) and dist(closest_enemy, self) < Ant.enemy_vision:
@@ -113,9 +131,10 @@ class Ant(pygame.sprite.Sprite):
                 is_attracted = True
             else:
                 closest_food = closest_object(self, Food.groups[0])
-                if (not (closest_food is None)) and dist(closest_food, self) < Ant.food_vision:
+                if (not (closest_food is None)) and dist(closest_food, self) < Ant.AI_food_vision:
                     object_turn_to(self, closest_food)
                     is_attracted = True
+        ###############################################
 
         if not is_attracted:
             self.spread_length -= move_length
@@ -164,9 +183,9 @@ class Ant(pygame.sprite.Sprite):
 class Pheromone(pygame.sprite.Sprite):
     # static class variables
     # image setup
-    image = pygame.Surface((8, 8))
+    image = pygame.Surface((8,8))
     image.set_colorkey((0, 0, 0))
-    pygame.draw.circle(image, (255, 0, 255), (4, 4), 4)
+    pygame.draw.circle(image, (255, 0, 255), (4,4), 4)
     image = image.convert_alpha()
 
     # code for each individual class instances
