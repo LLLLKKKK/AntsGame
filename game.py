@@ -20,6 +20,7 @@ class Game:
 
         Pheromone.groups = self.pheromone_group, self.all_group
         Food.groups = self.food_group, self.all_group
+        Cursor.groups = self.all_group
 
         self.ant_enemy_groups = [0] * 2
         self.ant_enemy_groups[self.player_ant_groupid] = self.get_enemy_groups(self.player_ant_groupid)
@@ -57,7 +58,7 @@ class Game:
         # spawn new ants
         self.spawn_ant(self.computer_ant_groupid)
         self.spawn_ant(self.player_ant_groupid)
-
+        self.cursor = Cursor()
         self.clock = pygame.time.Clock()
 
     def update(self, screen, background, main):
@@ -69,6 +70,8 @@ class Game:
         milliseconds = self.clock.tick(60)
         seconds = milliseconds / 1000.0
 
+        self.cursor.rect.center = pygame.mouse.get_pos()
+
         self.time_counter += 1
         if self.time_counter >= setting.TIME_SCALE:
             self.time_counter = 0
@@ -78,8 +81,9 @@ class Game:
             Food((posx, posy))
 
         for groupid, ant_group in enumerate(self.ant_groups):
-            killed_pheromone_dict = pheromone_eat_group = pygame.sprite.groupcollide(self.pheromone_group, ant_group, True, False)
-            killed_food_dict = food_eat_group = pygame.sprite.groupcollide(self.food_group, ant_group, True, False)
+            pheromone_collide_func = lambda s1, s2: s1.pheromone_rect.colliderect(s2.rect)
+            killed_pheromone_dict = pygame.sprite.groupcollide(self.pheromone_group, ant_group, True, False, pheromone_collide_func)
+            killed_food_dict = pygame.sprite.groupcollide(self.food_group, ant_group, True, False)
 
             if groupid == self.player_ant_groupid:
                 self.score += len(killed_food_dict) * 20

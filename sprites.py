@@ -58,10 +58,12 @@ class Ant(pygame.sprite.Sprite):
 
     images = []
     #images.append(create_circle_image(8, (255, 255, 0)))
-    ant_image = pygame.image.load(os.path.join("", "ant.png")).convert()
-    #ant_image.set_colorkey(ant_image.get_at((0, 0)))
+    ant_image = pygame.image.load("green_ant.bmp").convert()
+    ant_image.set_colorkey(ant_image.get_at((0, 0)))
     images.append(ant_image)
-    images.append(create_circle_image(8, (0, 255, 255)))
+    ant_image = pygame.image.load("blue_ant.bmp").convert()
+    ant_image.set_colorkey(ant_image.get_at((0, 0)))
+    images.append(ant_image)
 
     hives = []
     hives.append((10, 20))
@@ -164,9 +166,11 @@ class Ant(pygame.sprite.Sprite):
 class Pheromone(pygame.sprite.Sprite):
     # static class variables
     # image setup
-    image = pygame.Surface((8, 8))
+    image = pygame.Surface((Ant.pheromone_vision * 2, Ant.pheromone_vision * 2))
     image.set_colorkey((0, 0, 0))
-    pygame.draw.circle(image, (255, 0, 255), (4, 4), 4)
+
+    pygame.draw.circle(image, (255, 0, 255), (Ant.pheromone_vision, Ant.pheromone_vision), 4)
+    pygame.draw.circle(image, (255, 0, 255), (Ant.pheromone_vision, Ant.pheromone_vision), Ant.pheromone_vision, 2)
     image = image.convert_alpha()
 
     # code for each individual class instances
@@ -175,7 +179,8 @@ class Pheromone(pygame.sprite.Sprite):
         self.image = Pheromone.image
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        self.radius = 100
+        self.pheromone_rect = pygame.Rect(pos, (4, 4))
+        self.radius = 4
         self.live = 10.0
 
     def update(self, seconds):
@@ -202,10 +207,28 @@ class Food(pygame.sprite.Sprite):
         self.image = Food.image
         self.rect = self.image.get_rect()
         self.rect.center = pos
-        self.radius = 100
+        self.radius = 4
 
     def update(self, seconds):
         pass
 
     def get_center(self):
         return self.rect.center
+
+
+class Cursor(pygame.sprite.Sprite):
+
+    image = pygame.Surface((Ant.pheromone_vision * 2, Ant.pheromone_vision * 2))
+    image.set_colorkey((0, 0, 0))
+
+    pygame.draw.circle(image, (255, 0, 255), (Ant.pheromone_vision, Ant.pheromone_vision), Ant.pheromone_vision, 1)
+    image = image.convert_alpha()
+
+    # code for each individual class instances
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self, self.groups)
+        self.image = Cursor.image
+        self.rect = self.image.get_rect()
+
+    def update(self, seconds):
+        pass
