@@ -111,6 +111,18 @@ class Game:
         score_text = self.font.render("Score: " + str(self.score), True, (255, 255, 255))
         screen.blit(score_text, (screen_width - score_text.get_width() - 10, screen_height - score_text.get_height() - 10))
 
+        ############################################
+        # End game when one group is eliminated
+        if not self.ant_groups[0]:
+            # No player Ant left
+            main.highscore.add_score(self.score)
+            main.set_state(main.States.Menu)
+        if not self.ant_groups[1]:
+            # No computer ant left
+            main.highscore.add_score(self.score)
+            main.set_state(main.States.Menu)
+        #############################################
+            
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
