@@ -116,4 +116,4 @@ class Game:
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     main.highscore.add_score(self.score)
-                    main.set_state(main.States.Menu)
+                    main.set_state(main.States.HighScore)
