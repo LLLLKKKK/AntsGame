@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import os
 import pygame
 from pygame.locals import *
@@ -51,4 +53,5 @@ class Main:
         if new_state == Main.States.Game:
             self.game.reset()
 
-Main()
+if __name__ == "__main__":
+    Main()

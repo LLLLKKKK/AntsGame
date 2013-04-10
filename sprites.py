@@ -58,10 +58,10 @@ class Ant(pygame.sprite.Sprite):
 
     images = []
     #images.append(create_circle_image(8, (255, 255, 0)))
-    ant_image = pygame.image.load("green_ant.bmp").convert()
+    ant_image = pygame.image.load(os.path.join("images", "green_ant.bmp")).convert()
     ant_image.set_colorkey(ant_image.get_at((0, 0)))
     images.append(ant_image)
-    ant_image = pygame.image.load("blue_ant.bmp").convert()
+    ant_image = pygame.image.load(os.path.join("images", "blue_ant.bmp")).convert()
     ant_image.set_colorkey(ant_image.get_at((0, 0)))
     images.append(ant_image)
 

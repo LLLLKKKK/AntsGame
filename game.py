@@ -17,10 +17,13 @@ class Game:
         self.ant_groups.append(pygame.sprite.Group())
         self.food_group = pygame.sprite.Group()
         self.all_group = pygame.sprite.Group()
+        self.cursor_group = pygame.sprite.Group()
 
         Pheromone.groups = self.pheromone_group, self.all_group
         Food.groups = self.food_group, self.all_group
-        Cursor.groups = self.all_group
+        Cursor.groups = self.cursor_group
+
+        self.show_range = False
 
         self.ant_enemy_groups = [0] * 2
         self.ant_enemy_groups[self.player_ant_groupid] = self.get_enemy_groups(self.player_ant_groupid)
@@ -102,6 +105,8 @@ class Game:
         self.all_group.clear(screen, background)
         self.all_group.update(seconds)
         self.all_group.draw(screen)
+        if self.show_range:
+            self.cursor_group.draw(screen)
 
         score_text = self.font.render("Score: " + str(self.score), True, (255, 255, 255))
         screen.blit(score_text, (screen_width - score_text.get_width() - 10, screen_height - score_text.get_height() - 10))
@@ -110,9 +115,13 @@ class Game:
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
-            elif event.type == MOUSEBUTTONUP:
+            elif event.type == MOUSEBUTTONDOWN:
+                mouse_pressed = pygame.mouse.get_pressed()
                 pos = pygame.mouse.get_pos()
-                Pheromone(pos)
+                if mouse_pressed[0]:
+                    Pheromone(pos)
+                elif mouse_pressed[2]:
+                    self.show_range = not self.show_range
             elif event.type == KEYDOWN:
                 if event.key == K_SPACE:
                     main.highscore.add_score(self.score)
