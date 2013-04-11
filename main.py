@@ -4,6 +4,7 @@ import os
 import pygame
 from pygame.locals import *
 import pygame.mixer
+from configs import *
 
 
 class Main:
@@ -16,7 +17,7 @@ class Main:
         pygame.init()
         pygame.display.set_caption('Ants')
 
-        self.screen = pygame.display.set_mode((800, 600))
+        self.screen = pygame.display.set_mode((screen_width, screen_height))
         self.background = pygame.image.load(os.path.join("images", "soil.jpg"))
         # self.background = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
         # self.background.fill((0, 0, 0))

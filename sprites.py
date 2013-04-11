@@ -1,6 +1,9 @@
-import setting, random, os, pygame, math
+import random
+import os
+import math
+import pygame
 from pygame.locals import *
-from setting import screen_width, screen_height
+from configs import *
 
 random.seed()
 

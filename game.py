@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 from sprites import *
 from pygame.locals import *
 import pygame.mixer
@@ -31,6 +32,7 @@ class Game:
 
         self.time_counter = 0
         self.score = 0
+        self.food_period = 60
 
         self.font = pygame.font.SysFont("Consolas Bold", 50)
 
@@ -74,7 +76,7 @@ class Game:
 
     def generate_food(self, screen):
         self.time_counter += 1
-        if self.time_counter >= setting.TIME_SCALE:
+        if self.time_counter >= self.food_period:
             self.time_counter = 0
 
             posx = random.uniform(0, screen.get_width())
