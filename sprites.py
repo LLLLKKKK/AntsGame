@@ -216,7 +216,7 @@ class Food(pygame.sprite.Sprite):
     # image setup
     image = pygame.Surface((8, 8))
     image.set_colorkey((0, 0, 0))
-    pygame.draw.circle(image, (0, 255, 0), (4, 4), 4)
+    pygame.draw.circle(image, (255, 0, 0), (4, 4), 4)
     image = image.convert_alpha()
 
     # code for each individual class instances

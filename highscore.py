@@ -3,14 +3,17 @@ from pygame.locals import *
 import sys
 
 WHITE = (255, 255, 255)
+BLUE = (0, 0, 255)
+RED = (255, 0, 0)
+BLACK = (0, 0, 0)
 GRAY = (170, 170, 170)
 
 
 class HighScore:
 
     def __init__(self):
-        self.font = pygame.font.SysFont("Consolas", 30)
-        self.score_title = self.font.render("High Scores", True, (255, 255, 255))
+        self.font = pygame.font.SysFont("Consolas Bold", 50)
+        self.score_title = self.font.render("High Scores", True, WHITE)
         self.scores = []
         self.score_file = open('scores', 'a+')
         for line in self.score_file:
@@ -22,7 +25,7 @@ class HighScore:
         for index, score_ in enumerate(self.scores):
             if index > self.num_display:
                 break
-            self.score_texts.append(self.font.render(str(score_), True, (255, 255, 255)))
+            self.score_texts.append(self.font.render(str(score_), True, WHITE))
 
     def __del__(self):
         self.score_file.close()
@@ -38,9 +41,9 @@ class HighScore:
                 break
             color_now = None
             if score == score_:
-                color_now = (255, 0, 0)
+                color_now = RED
             else:
-                color_now = (255, 255, 255)
+                color_now = WHITE
             self.score_texts.append(self.font.render(str(score_), True, color_now))
 
     def update(self, screen, background, main):

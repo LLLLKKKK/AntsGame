@@ -17,8 +17,9 @@ class Main:
         pygame.display.set_caption('Ants')
 
         self.screen = pygame.display.set_mode((800, 600))
-        self.background = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
-        self.background.fill((0, 0, 0))
+        self.background = pygame.image.load(os.path.join("images", "soil.jpg"))
+        # self.background = pygame.Surface((self.screen.get_width(), self.screen.get_height()))
+        # self.background.fill((0, 0, 0))
 
         self.now_state = Main.States.Menu
 

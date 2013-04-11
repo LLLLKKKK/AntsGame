@@ -32,7 +32,7 @@ class Game:
         self.time_counter = 0
         self.score = 0
 
-        self.font = pygame.font.SysFont("Consolas", 30)
+        self.font = pygame.font.SysFont("Consolas Bold", 50)
 
         self.explosion_sound = pygame.mixer.Sound(os.path.join("sounds", "explosion.wav"))
         self.eat_sound = pygame.mixer.Sound(os.path.join("sounds", "eat.wav"))
@@ -119,7 +119,7 @@ class Game:
         self.all_group.update(seconds)
         self.all_group.draw(screen)
 
-        score_text = self.font.render("Score: " + str(self.score), True, (255, 255, 255))
+        score_text = self.font.render("Score: " + str(self.score), True, (255, 255, 0))
         screen.blit(score_text, (screen_width - score_text.get_width() - 10, screen_height - score_text.get_height() - 10))
 
         ############################################

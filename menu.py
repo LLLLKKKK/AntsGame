@@ -1,9 +1,11 @@
 import pygame
 from pygame.locals import *
 import sys
+import os
 
 WHITE = (255, 255, 255)
 GRAY = (170, 170, 170)
+BLACK = (0, 0, 0)
 
 
 class Menu:
@@ -14,13 +16,12 @@ class Menu:
         Last = 2
 
     def __init__(self):
-        #self.logo = pygame.image.load(os.path.join("graphics", "logo.png")).convert()
-        #self.logo = pygame.transform.scale(self.logo, (int(3.5*screen_width/4), screen_height/4))
-        #self.logo.set_colorkey(self.logo.get_at((0, 0)))
+        self.logo = pygame.image.load(os.path.join("images", "logo.png")).convert_alpha()
+        self.logo.set_colorkey(self.logo.get_at((0, 0)))
 
         self.now_item = Menu.MenuItem.NewGame
 
-        font = pygame.font.SysFont("Consolas", 30)
+        font = pygame.font.SysFont("Consolas Bold", 50)
         self.newgame_o = font.render("New Game", True, WHITE)
         self.newgame_f = font.render("New Game", True, GRAY)
         self.quit_o = font.render("Quit", True, WHITE)
@@ -31,11 +32,11 @@ class Menu:
         self.now_item = 0
 
     def update(self, screen, background, main):
-        #t = pygame.time.get_ticks()
-        screen.blit(background, (0, 0))
-        #screen.blit(self.logo, (50, 50))
         screen_height = screen.get_height()
         screen_width = screen.get_width()
+
+        screen.blit(background, (0, 0))
+        screen.blit(self.logo, (screen_width/2 - self.logo.get_width()/2, 80))
 
         if self.now_item == Menu.MenuItem.NewGame:
             screen.blit(self.newgame_o, (screen_width/2 - self.newgame_o.get_width()/2, 2*screen_height/3))
@@ -43,14 +44,14 @@ class Menu:
             screen.blit(self.newgame_f, (screen_width/2 - self.newgame_f.get_width()/2, 2*screen_height/3))
 
         if self.now_item == Menu.MenuItem.HighScore:
-            screen.blit(self.highscores_o, (screen_width/2 - self.highscores_f.get_width()/2, 2*screen_height/3 + 35))
+            screen.blit(self.highscores_o, (screen_width/2 - self.highscores_f.get_width()/2, 2*screen_height/3 + 50))
         else:
-            screen.blit(self.highscores_f, (screen_width/2 - self.highscores_f.get_width()/2, 2*screen_height/3 + 35))
+            screen.blit(self.highscores_f, (screen_width/2 - self.highscores_f.get_width()/2, 2*screen_height/3 + 50))
 
         if self.now_item == Menu.MenuItem.Quit:
-            screen.blit(self.quit_o, (screen_width/2 - self.quit_o.get_width()/2, 2*screen_height/3 + 70))
+            screen.blit(self.quit_o, (screen_width/2 - self.quit_o.get_width()/2, 2*screen_height/3 + 100))
         else:
-            screen.blit(self.quit_f, (screen_width/2 - self.quit_o.get_width()/2, 2*screen_height/3 + 70))
+            screen.blit(self.quit_f, (screen_width/2 - self.quit_o.get_width()/2, 2*screen_height/3 + 100))
 
         for event in pygame.event.get():
             if event.type == QUIT:
