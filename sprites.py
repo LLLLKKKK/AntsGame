@@ -5,50 +5,12 @@ from setting import screen_width, screen_height
 random.seed()
 
 
-def dist(obj1, obj2):
-    center1 = obj1.get_center()
-    center2 = obj2.get_center()
-    return math.hypot(center1[0] - center2[0],
-                      center1[1] - center2[1])
-
-
-def closest_object(ant, object_group):
-    if len(object_group) > 0:
-        it = iter(object_group)
-        obj = it.next()
-        for i in it:
-            if (dist(ant, i) < dist(ant, obj)):
-                obj = i
-        return obj
-    else:
-        pass
-
-
-def object_turn_to(obj1, obj2):
-    center1 = obj1.get_center()
-    center2 = obj2.get_center()
-
-    dist_x = center2[0] - center1[0]
-    dist_y = center2[1] - center1[1]
-
-    if dist_x != 0:
-        if dist_x > 0:
-            obj1.angle = math.atan(dist_y * 1.0 / dist_x)
-        else:
-            obj1.angle = math.pi + math.atan(dist_y * 1.0 / dist_x)
-    else:
-        if dist_y > 0:
-            obj1.angle = -math.pi / 2.0
-        else:
-            obj1.angle = math.pi / 2.0
-
-
-def create_circle_image(diameter, color):
-    image = pygame.Surface((diameter * 2, diameter * 2))
-    image.set_colorkey((0, 0, 0))
-    pygame.draw.circle(image, color, (diameter, diameter), 4)
-    image = image.convert_alpha()
-    return image
+# def create_circle_image(diameter, color):
+#     image = pygame.Surface((diameter * 2, diameter * 2))
+#     image.set_colorkey((0, 0, 0))
+#     pygame.draw.circle(image, color, (diameter, diameter), 4)
+#     image = image.convert_alpha()
+#     return image
 
 
 class Ant(pygame.sprite.Sprite):
@@ -61,6 +23,7 @@ class Ant(pygame.sprite.Sprite):
     ant_image = pygame.image.load(os.path.join("images", "green_ant.bmp")).convert()
     ant_image.set_colorkey(ant_image.get_at((0, 0)))
     images.append(ant_image)
+
     ant_image = pygame.image.load(os.path.join("images", "blue_ant.bmp")).convert()
     ant_image.set_colorkey(ant_image.get_at((0, 0)))
     images.append(ant_image)
@@ -100,6 +63,41 @@ class Ant(pygame.sprite.Sprite):
 
         self.rotate()
 
+    def distance(self, obj):
+        center1 = self.get_center()
+        center2 = obj.get_center()
+        return math.hypot(center1[0] - center2[0],
+                          center1[1] - center2[1])
+
+    def closest_object(self, object_group):
+        if len(object_group) > 0:
+            it = iter(object_group)
+            obj = it.next()
+            for i in it:
+                if (self.distance(i) < self.distance(obj)):
+                    obj = i
+            return obj
+        else:
+            pass
+
+    def turn_to(self, obj):
+        center1 = self.get_center()
+        center2 = obj.get_center()
+
+        dist_x = center2[0] - center1[0]
+        dist_y = center2[1] - center1[1]
+
+        if dist_x != 0:
+            if dist_x > 0:
+                self.angle = math.atan(dist_y * 1.0 / dist_x)
+            else:
+                self.angle = math.pi + math.atan(dist_y * 1.0 / dist_x)
+        else:
+            if dist_y > 0:
+                self.angle = -math.pi / 2.0
+            else:
+                self.angle = math.pi / 2.0
+
     def update(self, seconds):
 
         move_length = seconds * self.speed
@@ -108,30 +106,30 @@ class Ant(pygame.sprite.Sprite):
         ##############################################
         # Player AI
         if(self.groupid == 0):
-            closest_pheromone = closest_object(self, Pheromone.groups[0])
-            if (self.groupid == 0 and not (closest_pheromone is None)) and dist(closest_pheromone, self) < Ant.pheromone_vision:
-                object_turn_to(self, closest_pheromone)
+            closest_pheromone = self.closest_object(Pheromone.groups[0])
+            if (self.groupid == 0 and not (closest_pheromone is None)) and self.distance(closest_pheromone) < Ant.pheromone_vision:
+                self.turn_to(closest_pheromone)
                 is_attracted = True
             else:
-                closest_enemy = closest_object(self, self.enemy_groups[0])
-                if (not (closest_enemy is None)) and dist(closest_enemy, self) < Ant.enemy_vision:
-                    object_turn_to(self, closest_enemy)
+                closest_enemy = self.closest_object(self.enemy_groups[0])
+                if (not (closest_enemy is None)) and self.distance(closest_enemy) < Ant.enemy_vision:
+                    self.turn_to(closest_enemy)
                     is_attracted = True
                 else:
-                    closest_food = closest_object(self, Food.groups[0])
-                    if (not (closest_food is None)) and dist(closest_food, self) < Ant.food_vision:
-                        object_turn_to(self, closest_food)
+                    closest_food = self.closest_object(Food.groups[0])
+                    if (not (closest_food is None)) and self.distance(closest_food) < Ant.food_vision:
+                        self.turn_to(closest_food)
                         is_attracted = True
         # Enemy AI
         else:
-            closest_enemy = closest_object(self, self.enemy_groups[0])
-            if (not (closest_enemy is None)) and dist(closest_enemy, self) < Ant.enemy_vision:
-                object_turn_to(self, closest_enemy)
+            closest_enemy = self.closest_object(self.enemy_groups[0])
+            if (not (closest_enemy is None)) and self.distance(closest_enemy) < Ant.enemy_vision:
+                self.turn_to(closest_enemy)
                 is_attracted = True
             else:
-                closest_food = closest_object(self, Food.groups[0])
-                if (not (closest_food is None)) and dist(closest_food, self) < Ant.AI_food_vision:
-                    object_turn_to(self, closest_food)
+                closest_food = self.closest_object(Food.groups[0])
+                if (not (closest_food is None)) and self.distance(closest_food) < Ant.AI_food_vision:
+                    self.turn_to(closest_food)
                     is_attracted = True
         ###############################################
 
@@ -144,6 +142,10 @@ class Ant(pygame.sprite.Sprite):
             self.spread_length = Ant.spread_length
 
         self.rotate()
+        self.move(move_length)
+
+    def move(self, move_length):
+
         self.centerx += move_length * math.cos(self.angle)
         self.centery += move_length * math.sin(self.angle)
 
